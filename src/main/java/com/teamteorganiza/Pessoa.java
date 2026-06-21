@@ -23,4 +23,65 @@ public class Pessoa
         this.ativo = ativo;
         
     }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public String getNome()
+    {
+        return nome;
+    }
+
+    public void setNome(String nome)
+    {
+        this.nome = nome;
+    }
+
+    public LocalDate getDataDeNascimento()
+    {
+        return dataDeNascimento;
+    }
+
+    public void setDataDeNascimento(LocalDate dataDeNascimento)
+    {
+        this.dataDeNascimento = dataDeNascimento;
+    }
+
+    public String getCpf()
+    {
+        return cpf;
+    }
+
+    // CPF normalmente não muda após o cadastro, então não foi criado setter.
+    public String getTelefone()
+    {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone)
+    {
+        this.telefone = telefone;
+    }
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.email = email;
+    }
+
+    public boolean isAtivo()
+    {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo)
+    {
+        this.ativo = ativo;
+    }
 }
