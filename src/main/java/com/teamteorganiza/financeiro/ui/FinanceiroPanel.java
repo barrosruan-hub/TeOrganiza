@@ -12,21 +12,33 @@ public class FinanceiroPanel extends JPanel {
 
     private final FinanceiroService service;
     private final JPanel painelSaldos;
+    private Runnable onVoltar;
 
     public FinanceiroPanel(FinanceiroService service) {
         this.service = service;
         setLayout(new BorderLayout(8, 8));
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JButton btnVoltar = new JButton("← Voltar");
+        btnVoltar.addActionListener(e -> { if (onVoltar != null) onVoltar.run(); });
+        topBar.add(btnVoltar);
+        add(topBar, BorderLayout.NORTH);
+
+        JPanel content = new JPanel(new BorderLayout(8, 8));
+
         painelSaldos = new JPanel();
         painelSaldos.setLayout(new BoxLayout(painelSaldos, BoxLayout.Y_AXIS));
         painelSaldos.setBorder(BorderFactory.createTitledBorder("Saldos dos caixas"));
-        add(new JScrollPane(painelSaldos), BorderLayout.NORTH);
+        content.add(new JScrollPane(painelSaldos), BorderLayout.NORTH);
+        content.add(montarPainelAcoes(), BorderLayout.CENTER);
 
-        add(montarPainelAcoes(), BorderLayout.CENTER);
+        add(content, BorderLayout.CENTER);
 
         atualizarSaldos();
     }
+
+    public void setOnVoltar(Runnable r) { this.onVoltar = r; }
 
     private JPanel montarPainelAcoes() {
         JPanel painel = new JPanel(new GridLayout(0, 1, 4, 4));

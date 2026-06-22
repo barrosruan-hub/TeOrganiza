@@ -14,13 +14,20 @@ public class PessoaPanel extends JPanel {
 
     private final PessoaService service;
     private final DefaultTableModel tableModel;
+    private Runnable onVoltar;
 
     public PessoaPanel(PessoaService service) {
         this.service = service;
         setLayout(new BorderLayout(8, 8));
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        String[] colunas = {"ID", "Nome", "CPF", "Telefone", "E-mail", "Ativo"};
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JButton btnVoltar = new JButton("← Voltar");
+        btnVoltar.addActionListener(e -> { if (onVoltar != null) onVoltar.run(); });
+        topBar.add(btnVoltar);
+        add(topBar, BorderLayout.NORTH);
+
+        String[] colunas = {"ID", "Nome", "CPF", "Idade", "Telefone", "E-mail", "Ativo"};
         tableModel = new DefaultTableModel(colunas, 0) {
             @Override
             public boolean isCellEditable(int row, int col) { return false; }
@@ -33,6 +40,8 @@ public class PessoaPanel extends JPanel {
 
         atualizarTabela();
     }
+
+    public void setOnVoltar(Runnable r) { this.onVoltar = r; }
 
     private JPanel montarFormulario() {
         JPanel painel = new JPanel(new GridBagLayout());
