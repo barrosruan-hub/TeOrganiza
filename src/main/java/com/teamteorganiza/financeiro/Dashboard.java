@@ -61,9 +61,10 @@ public class Dashboard {
 
     private String categoriaDe(Lancamento l) {
         if (l instanceof Mensalidade) return "Mensalidades";
-        else if (l instanceof LancamentoCaixa lc) return "Caixa " + lc.getCaixa();
+        else if (l instanceof MovimentacaoFinanceira m)
+            return m.getTipo() == TipoLancamento.RECEITA ? "Entradas" : "Despesas";
         else if (l instanceof ContribuicaoVaquinha) return "Vaquinha";
-        else if (l instanceof VendaEvento) return "Baile";
+        else if (l instanceof VendaCaixa) return "Caixa";
         return "Outros";
     }
 

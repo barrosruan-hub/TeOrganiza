@@ -2,7 +2,6 @@ package com.teamteorganiza;
 
 import com.teamteorganiza.estoque.ui.EstoquePanel;
 import com.teamteorganiza.eventos.ui.EventosPanel;
-import com.teamteorganiza.financeiro.CaixaRepositoryEmMemoria;
 import com.teamteorganiza.financeiro.FinanceiroService;
 import com.teamteorganiza.financeiro.MensalidadeRepositoryEmMemoria;
 import com.teamteorganiza.financeiro.ui.FinanceiroPanel;
@@ -23,8 +22,7 @@ public class App {
         SwingUtilities.invokeLater(() -> {
             PessoaService pessoaService = new PessoaService(new PessoaRepositoryEmMemoria());
             FinanceiroService financeiroService = new FinanceiroService(
-                new MensalidadeRepositoryEmMemoria(),
-                new CaixaRepositoryEmMemoria()
+                new MensalidadeRepositoryEmMemoria()
             );
 
             JPanel root = new JPanel(new CardLayout());
@@ -32,7 +30,7 @@ public class App {
 
             HomePanel      homePanel      = new HomePanel();
             PessoaPanel    pessoaPanel    = new PessoaPanel(pessoaService);
-            FinanceiroPanel financeiroPanel = new FinanceiroPanel(financeiroService);
+            FinanceiroPanel financeiroPanel = new FinanceiroPanel(financeiroService, pessoaService);
             EstoquePanel   estoquePanel   = new EstoquePanel();
             EventosPanel   eventosPanel   = new EventosPanel();
 

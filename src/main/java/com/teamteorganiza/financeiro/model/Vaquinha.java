@@ -22,8 +22,14 @@ public class Vaquinha {
     public double getMeta() { return meta; }
     public List<ContribuicaoVaquinha> getContribuicoes() { return contribuicoes; }
 
-    public void contribuir(int pessoaId, double valor, boolean anonima) {
-        contribuicoes.add(new ContribuicaoVaquinha(pessoaId, valor, anonima));
+    public ContribuicaoVaquinha contribuir(int pessoaId, double valor, String descricao) {
+        ContribuicaoVaquinha c = new ContribuicaoVaquinha(pessoaId, valor, descricao);
+        contribuicoes.add(c);
+        return c;
+    }
+
+    public void removerContribuicao(int id) {
+        contribuicoes.removeIf(c -> c.getId() == id);
     }
 
     public double totalArrecadado() {

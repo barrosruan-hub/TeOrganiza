@@ -1,21 +1,24 @@
 package com.teamteorganiza.financeiro.ui;
 
 import com.teamteorganiza.financeiro.FinanceiroService;
-import com.teamteorganiza.financeiro.model.Caixa;
-import com.teamteorganiza.financeiro.model.TipoCaixa;
+import com.teamteorganiza.financeiro.model.TipoLancamento;
+import com.teamteorganiza.pessoas.Pessoa;
+import com.teamteorganiza.pessoas.PessoaService;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
+import java.util.function.Function;
 
 public class FinanceiroPanel extends JPanel {
 
-    private final FinanceiroService service;
-    private final JPanel painelSaldos;
+    private final ExtratoTab extratoTab;
+    private final MovimentacaoTab entradasTab;
+    private final MovimentacaoTab despesasTab;
+    private final VaquinhaTab vaquinhaTab;
+    private final CaixaTab caixaTab;
     private Runnable onVoltar;
 
-    public FinanceiroPanel(FinanceiroService service) {
-        this.service = service;
+    public FinanceiroPanel(FinanceiroService service, PessoaService pessoaService) {
         setLayout(new BorderLayout(8, 8));
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
@@ -25,83 +28,43 @@ public class FinanceiroPanel extends JPanel {
         topBar.add(btnVoltar);
         add(topBar, BorderLayout.NORTH);
 
-        JPanel content = new JPanel(new BorderLayout(8, 8));
+        Function<Integer, String> nomeResolver = id -> nomeDe(pessoaService, id);
+        Runnable onChange = this::recarregarTodas;
 
-        painelSaldos = new JPanel();
-        painelSaldos.setLayout(new BoxLayout(painelSaldos, BoxLayout.Y_AXIS));
-        painelSaldos.setBorder(BorderFactory.createTitledBorder("Saldos dos caixas"));
-        content.add(new JScrollPane(painelSaldos), BorderLayout.NORTH);
-        content.add(montarPainelAcoes(), BorderLayout.CENTER);
+        extratoTab  = new ExtratoTab(service, nomeResolver);
+        entradasTab = new MovimentacaoTab(service, nomeResolver, onChange, TipoLancamento.RECEITA);
+        despesasTab = new MovimentacaoTab(service, nomeResolver, onChange, TipoLancamento.DESPESA);
+        vaquinhaTab = new VaquinhaTab(service, nomeResolver, onChange);
+        caixaTab    = new CaixaTab(service, nomeResolver, onChange);
 
-        add(content, BorderLayout.CENTER);
+        JTabbedPane abas = new JTabbedPane();
+        abas.addTab("Extrato",   extratoTab);
+        abas.addTab("Entradas",  entradasTab);
+        abas.addTab("Despesas",  despesasTab);
+        abas.addTab("Vaquinhas", vaquinhaTab);
+        abas.addTab("Caixa",     caixaTab);
+        abas.addChangeListener(e -> recarregarTodas());
 
-        atualizarSaldos();
+        add(abas, BorderLayout.CENTER);
+
+        recarregarTodas();
     }
 
     public void setOnVoltar(Runnable r) { this.onVoltar = r; }
 
-    private JPanel montarPainelAcoes() {
-        JPanel painel = new JPanel(new GridLayout(0, 1, 4, 4));
-        painel.setBorder(BorderFactory.createTitledBorder("Registrar movimentação"));
-
-        for (TipoCaixa tipo : TipoCaixa.values()) {
-            JPanel linha = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
-
-            JLabel lblTipo    = new JLabel(tipo.name() + ":");
-            lblTipo.setPreferredSize(new Dimension(90, 24));
-            linha.add(lblTipo);
-
-            JTextField tfDesc  = new JTextField(14);
-            JTextField tfValor = new JTextField(8);
-            JTextField tfResp  = new JTextField(10);
-
-            linha.add(new JLabel("Descrição:")); linha.add(tfDesc);
-            linha.add(new JLabel("Valor:"));     linha.add(tfValor);
-            linha.add(new JLabel("Resp.:"));     linha.add(tfResp);
-
-            JButton btnEntrada = new JButton("+ Entrada");
-            JButton btnSaida   = new JButton("- Saída");
-            linha.add(btnEntrada);
-            linha.add(btnSaida);
-
-            btnEntrada.addActionListener(e -> {
-                try {
-                    double valor = Double.parseDouble(tfValor.getText().trim().replace(",", "."));
-                    service.registrarEntrada(tipo, tfDesc.getText().trim(), valor, tfResp.getText().trim());
-                    tfDesc.setText(""); tfValor.setText(""); tfResp.setText("");
-                    atualizarSaldos();
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Valor inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
-                }
-            });
-
-            btnSaida.addActionListener(e -> {
-                try {
-                    double valor = Double.parseDouble(tfValor.getText().trim().replace(",", "."));
-                    service.registrarSaida(tipo, tfDesc.getText().trim(), valor, tfResp.getText().trim());
-                    tfDesc.setText(""); tfValor.setText(""); tfResp.setText("");
-                    atualizarSaldos();
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Valor inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
-                }
-            });
-
-            painel.add(linha);
-        }
-
-        return painel;
+    private void recarregarTodas() {
+        extratoTab.recarregar();
+        entradasTab.recarregar();
+        despesasTab.recarregar();
+        vaquinhaTab.recarregar();
+        caixaTab.recarregar();
     }
 
-    private void atualizarSaldos() {
-        painelSaldos.removeAll();
-        List<Caixa> caixas = service.getCaixas();
-        for (Caixa c : caixas) {
-            String texto = String.format("  %s:   R$ %.2f", c.getTipo().name(), c.saldoAtual());
-            JLabel label = new JLabel(texto);
-            label.setFont(label.getFont().deriveFont(Font.PLAIN, 14f));
-            painelSaldos.add(label);
+    private static String nomeDe(PessoaService pessoaService, int pessoaId) {
+        if (pessoaId <= 0) return "(caixa/evento)";
+        for (Pessoa p : pessoaService.listar()) {
+            if (p.getId() == pessoaId) return p.getNome();
         }
-        painelSaldos.revalidate();
-        painelSaldos.repaint();
+        return "(id " + pessoaId + " não encontrado)";
     }
 }
