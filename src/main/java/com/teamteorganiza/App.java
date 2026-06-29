@@ -1,6 +1,10 @@
 package com.teamteorganiza;
 
+import com.teamteorganiza.estoque.EstoqueRepositoryEmMemoria;
+import com.teamteorganiza.estoque.EstoqueService;
 import com.teamteorganiza.estoque.ui.EstoquePanel;
+import com.teamteorganiza.eventos.CompromissoRepositoryEmMemoria;
+import com.teamteorganiza.eventos.EventosService;
 import com.teamteorganiza.eventos.ui.EventosPanel;
 import com.teamteorganiza.financeiro.FinanceiroService;
 import com.teamteorganiza.financeiro.MensalidadeRepositoryEmMemoria;
@@ -34,6 +38,12 @@ public class App {
             FinanceiroService financeiroService = new FinanceiroService(
                 new MensalidadeRepositoryEmMemoria()
             );
+            EstoqueService estoqueService = new EstoqueService(
+                new EstoqueRepositoryEmMemoria()
+            );
+            EventosService eventosService = new EventosService(
+                new CompromissoRepositoryEmMemoria()
+            );
 
             JPanel root = new JPanel(new CardLayout());
             CardLayout cards = (CardLayout) root.getLayout();
@@ -42,8 +52,8 @@ public class App {
             PessoaPanel     pessoaPanel     = new PessoaPanel(pessoaService, tipoPessoaService);
             TipoPessoaPanel tipoPessoaPanel = new TipoPessoaPanel(tipoPessoaService, pessoaService);
             FinanceiroPanel financeiroPanel = new FinanceiroPanel(financeiroService, pessoaService);
-            EstoquePanel    estoquePanel    = new EstoquePanel();
-            EventosPanel    eventosPanel    = new EventosPanel();
+            EstoquePanel    estoquePanel    = new EstoquePanel(estoqueService);
+            EventosPanel    eventosPanel    = new EventosPanel(eventosService);
 
             root.add(homePanel,       "HOME");
             root.add(pessoaPanel,     "PESSOAS");
