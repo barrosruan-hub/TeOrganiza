@@ -28,11 +28,9 @@ public class PessoaService {
         return nova;
     }
 
-    public List<Pessoa> listar() {
-        return repositorio.listarTodos();
-    }
+    public List<Pessoa> listar() { return repositorio.listarTodos(); }
 
-    public void editar(int id, String nome, LocalDate nascimento, String telefone, String email,
+    public void editar(String id, String nome, LocalDate nascimento, String telefone, String email,
                        List<TipoPessoa> tipos) {
         repositorio.buscarPorId(id).ifPresent(p -> {
             p.setNome(nome);
@@ -42,26 +40,28 @@ public class PessoaService {
             p.setTipos(new ArrayList<>(tipos));
             boolean continuaInstrutor = tipos.stream()
                 .anyMatch(t -> t.getNome().equalsIgnoreCase("instrutor"));
-            if (!continuaInstrutor) {
-                instrutorDadosRepo.remover(id);
-            }
+            if (!continuaInstrutor) instrutorDadosRepo.remover(id);
+            repositorio.salvar(p);
         });
     }
 
-    public void desativar(int id) {
-        repositorio.buscarPorId(id).ifPresent(p -> p.setAtivo(!p.isAtivo()));
+    public void desativar(String id) {
+        repositorio.buscarPorId(id).ifPresent(p -> {
+            p.setAtivo(!p.isAtivo());
+            repositorio.salvar(p);
+        });
     }
 
-    public void remover(int id) {
+    public void remover(String id) {
         instrutorDadosRepo.remover(id);
         repositorio.remover(id);
     }
 
-    public void salvarDadosInstrutor(int pessoaId, double salario, String especialidades) {
+    public void salvarDadosInstrutor(String pessoaId, double salario, String especialidades) {
         instrutorDadosRepo.salvarOuAtualizar(new InstrutorDados(pessoaId, salario, especialidades));
     }
 
-    public Optional<InstrutorDados> buscarDadosInstrutor(int pessoaId) {
+    public Optional<InstrutorDados> buscarDadosInstrutor(String pessoaId) {
         return instrutorDadosRepo.buscarPorPessoaId(pessoaId);
     }
 }

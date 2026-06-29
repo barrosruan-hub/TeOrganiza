@@ -1,6 +1,5 @@
 package com.teamteorganiza.financeiro.ui;
 
-/** Conversões simples de texto dos formulários do financeiro. */
 final class CampoUtil {
 
     private CampoUtil() {}
@@ -9,7 +8,9 @@ final class CampoUtil {
         return Double.parseDouble(texto.trim().replace(",", "."));
     }
 
-    static int id(String texto) {
-        return Integer.parseInt(texto.trim());
+    static String id(String texto) {
+        String s = texto.trim();
+        if (s.isEmpty()) throw new IllegalArgumentException("ID vazio");
+        return s;
     }
 }

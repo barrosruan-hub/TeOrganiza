@@ -12,21 +12,18 @@ public class MensalidadeRepositoryEmMemoria implements MensalidadeRepository {
 
     @Override
     public void salvar(Mensalidade m) {
+        mensalidades.removeIf(x -> x.getId().equals(m.getId()));
         mensalidades.add(m);
     }
 
     @Override
-    public Optional<Mensalidade> buscarPorId(Integer id) {
-        return mensalidades.stream().filter(m -> m.getId() == id).findFirst();
+    public Optional<Mensalidade> buscarPorId(String id) {
+        return mensalidades.stream().filter(m -> m.getId().equals(id)).findFirst();
     }
 
     @Override
-    public List<Mensalidade> listarTodos() {
-        return new ArrayList<>(mensalidades);
-    }
+    public List<Mensalidade> listarTodos() { return new ArrayList<>(mensalidades); }
 
     @Override
-    public void remover(Integer id) {
-        mensalidades.removeIf(m -> m.getId() == id);
-    }
+    public void remover(String id) { mensalidades.removeIf(m -> m.getId().equals(id)); }
 }

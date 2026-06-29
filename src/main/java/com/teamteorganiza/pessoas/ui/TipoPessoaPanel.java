@@ -19,7 +19,7 @@ public class TipoPessoaPanel extends JPanel {
     private JTable tabela;
     private DefaultTableModel tableModel;
     private JTextField tfNome, tfDescricao;
-    private Integer idSelecionado = null;
+    private String idSelecionado = null;
 
     public TipoPessoaPanel(TipoPessoaService tipoPessoaService, PessoaService pessoaService) {
         this.tipoPessoaService = tipoPessoaService;
@@ -170,9 +170,9 @@ public class TipoPessoaPanel extends JPanel {
     private void popularFormulario() {
         int row = tabela.getSelectedRow();
         if (row < 0) { idSelecionado = null; return; }
-        idSelecionado = (int) tableModel.getValueAt(row, 0);
+        idSelecionado = (String) tableModel.getValueAt(row, 0);
         tipoPessoaService.listar().stream()
-            .filter(t -> t.getId() == idSelecionado)
+            .filter(t -> t.getId().equals(idSelecionado))
             .findFirst()
             .ifPresent(t -> {
                 tfNome.setText(t.getNome());

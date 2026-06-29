@@ -22,14 +22,14 @@ public class Vaquinha {
     public double getMeta() { return meta; }
     public List<ContribuicaoVaquinha> getContribuicoes() { return contribuicoes; }
 
-    public ContribuicaoVaquinha contribuir(int pessoaId, double valor, String descricao) {
+    public ContribuicaoVaquinha contribuir(String pessoaId, double valor, String descricao) {
         ContribuicaoVaquinha c = new ContribuicaoVaquinha(pessoaId, valor, descricao);
         contribuicoes.add(c);
         return c;
     }
 
-    public void removerContribuicao(int id) {
-        contribuicoes.removeIf(c -> c.getId() == id);
+    public void removerContribuicao(String id) {
+        contribuicoes.removeIf(c -> c.getId().equals(id));
     }
 
     public double totalArrecadado() {
@@ -38,20 +38,7 @@ public class Vaquinha {
         return total;
     }
 
-    public double quantoFalta() {
-        return Math.max(meta - totalArrecadado(), 0);
-    }
+    public double quantoFalta() { return Math.max(meta - totalArrecadado(), 0); }
 
-    public boolean metaAtingida() {
-        return totalArrecadado() >= meta;
-    }
-
-    public void listarContribuicoes() {
-        System.out.println("===== Vaquinha: " + titulo + " =====");
-        System.out.println("Objetivo: " + objetivo);
-        if (contribuicoes.isEmpty()) System.out.println("(nenhuma contribuição ainda)");
-        for (ContribuicaoVaquinha c : contribuicoes) System.out.println(c.detalhar());
-        System.out.printf("Arrecadado: R$ %.2f de R$ %.2f | Falta: R$ %.2f | Meta atingida: %s%n",
-                totalArrecadado(), meta, quantoFalta(), metaAtingida() ? "SIM" : "não");
-    }
+    public boolean metaAtingida() { return totalArrecadado() >= meta; }
 }

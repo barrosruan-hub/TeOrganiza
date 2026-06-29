@@ -21,9 +21,7 @@ public class TipoPessoaService {
         repositorio.salvar(new TipoPessoa(nome, descricao));
     }
 
-    public List<TipoPessoa> listar() {
-        return repositorio.listarTodos();
-    }
+    public List<TipoPessoa> listar() { return repositorio.listarTodos(); }
 
     public List<TipoPessoa> listarAtivos() {
         return repositorio.listarTodos().stream()
@@ -31,28 +29,32 @@ public class TipoPessoaService {
             .collect(Collectors.toList());
     }
 
-    public void editar(int id, String nome, String descricao) {
+    public void editar(String id, String nome, String descricao) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("Nome do tipo é obrigatório.");
         }
         repositorio.buscarPorNome(nome).ifPresent(existente -> {
-            if (existente.getId() != id) {
+            if (!existente.getId().equals(id)) {
                 throw new IllegalArgumentException("Já existe um tipo com o nome \"" + nome + "\".");
             }
         });
         repositorio.buscarPorId(id).ifPresent(t -> {
             t.setNome(nome);
             t.setDescricao(descricao);
+            repositorio.salvar(t);
         });
     }
 
-    public void desativar(int id) {
-        repositorio.buscarPorId(id).ifPresent(t -> t.setAtivo(!t.isAtivo()));
+    public void desativar(String id) {
+        repositorio.buscarPorId(id).ifPresent(t -> {
+            t.setAtivo(!t.isAtivo());
+            repositorio.salvar(t);
+        });
     }
 
-    public void remover(int id, List<Pessoa> todasPessoas) {
+    public void remover(String id, List<Pessoa> todasPessoas) {
         boolean emUso = todasPessoas.stream()
-            .anyMatch(p -> p.getTipos().stream().anyMatch(t -> t.getId() == id));
+            .anyMatch(p -> p.getTipos().stream().anyMatch(t -> t.getId().equals(id)));
         if (emUso) {
             throw new IllegalStateException(
                 "Este tipo está associado a uma ou mais pessoas. Desative-o em vez de excluir.");

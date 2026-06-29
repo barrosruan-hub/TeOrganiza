@@ -9,27 +9,23 @@ import java.awt.*;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Aba Caixa: registra as vendas de um evento e, ao fechar, lança o total
- * como uma única entrada no financeiro, reiniciando para um novo evento.
- */
 public class CaixaTab extends JPanel {
 
     private final FinanceiroService service;
-    private final Function<Integer, String> nomeResolver;
+    private final Function<String, String> nomeResolver;
     private final Runnable onChange;
 
     private final JTextField tfEvento = new JTextField(16);
     private final JLabel lblTotal = new JLabel();
     private final DefaultTableModel tableModel;
     private final JTable tabela;
-    private final JTextField tfId = new JTextField(8);
+    private final JTextField tfId = new JTextField(24);
     private final JTextArea taDescricao = new JTextArea(3, 24);
     private final JTextField tfValor = new JTextField(10);
 
     private List<VendaCaixa> linhas = List.of();
 
-    public CaixaTab(FinanceiroService service, Function<Integer, String> nomeResolver, Runnable onChange) {
+    public CaixaTab(FinanceiroService service, Function<String, String> nomeResolver, Runnable onChange) {
         this.service = service;
         this.nomeResolver = nomeResolver;
         this.onChange = onChange;
@@ -118,7 +114,7 @@ public class CaixaTab extends JPanel {
     }
 
     private void criar() {
-        Integer id = lerId();
+        String id = lerId();
         Double valor = lerValor();
         if (id == null || valor == null) return;
         service.registrarVenda(id, taDescricao.getText().trim(), valor);
@@ -129,7 +125,7 @@ public class CaixaTab extends JPanel {
     private void editar() {
         int row = tabela.getSelectedRow();
         if (row < 0) { aviso("Selecione uma venda para editar."); return; }
-        Integer id = lerId();
+        String id = lerId();
         Double valor = lerValor();
         if (id == null || valor == null) return;
         service.editarVenda(linhas.get(row).getId(), id, taDescricao.getText().trim(), valor);
@@ -147,15 +143,12 @@ public class CaixaTab extends JPanel {
 
     private void fecharCaixa() {
         double total = service.totalCaixa();
-        if (total <= 0) {
-            aviso("Não há vendas no caixa para fechar.");
-            return;
-        }
+        if (total <= 0) { aviso("Não há vendas no caixa para fechar."); return; }
         String nomeNovo = JOptionPane.showInputDialog(this,
                 String.format("Fechar o caixa de \"%s\" (total R$ %.2f) e lançar como 1 entrada.%n"
                         + "Nome do novo evento:", service.getNomeEvento(), total),
                 "Novo evento");
-        if (nomeNovo == null) return; // cancelado
+        if (nomeNovo == null) return;
         if (nomeNovo.trim().isEmpty()) nomeNovo = "Novo evento";
         service.fecharCaixa(nomeNovo.trim());
         limpar();
@@ -166,7 +159,7 @@ public class CaixaTab extends JPanel {
         int row = tabela.getSelectedRow();
         if (row < 0 || row >= linhas.size()) return;
         VendaCaixa v = linhas.get(row);
-        tfId.setText(String.valueOf(v.getPessoaId()));
+        tfId.setText(v.getPessoaId());
         taDescricao.setText(v.getDescricao());
         tfValor.setText(String.format("%.2f", v.getValor()));
     }
@@ -194,11 +187,11 @@ public class CaixaTab extends JPanel {
                 service.totalCaixa(), linhas.size()));
     }
 
-    private Integer lerId() {
+    private String lerId() {
         try {
             return CampoUtil.id(tfId.getText());
-        } catch (NumberFormatException ex) {
-            aviso("ID da pessoa inválido.");
+        } catch (IllegalArgumentException ex) {
+            aviso("ID da pessoa não informado.");
             return null;
         }
     }

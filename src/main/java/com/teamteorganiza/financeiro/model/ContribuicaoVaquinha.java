@@ -4,20 +4,20 @@ import java.time.LocalDate;
 
 public class ContribuicaoVaquinha extends Lancamento {
 
-    private int pessoaId;
+    private String pessoaId;
 
-    public ContribuicaoVaquinha(int pessoaId, double valor, String descricao) {
-        super((descricao == null || descricao.isBlank()) ? "Doação pessoa " + pessoaId : descricao,
+    public ContribuicaoVaquinha(String pessoaId, double valor, String descricao) {
+        super((descricao == null || descricao.isBlank()) ? "Doação" : descricao,
               valor, LocalDate.now(), TipoLancamento.RECEITA);
         this.pessoaId = pessoaId;
     }
 
-    public int getPessoaId() { return pessoaId; }
-    public void setPessoaId(int pessoaId) { this.pessoaId = pessoaId; }
+    public String getPessoaId() { return pessoaId; }
+    public void setPessoaId(String pessoaId) { this.pessoaId = pessoaId; }
 
     @Override
     public String detalhar() {
-        return String.format("Contribuição #%d | pessoa %d | %s | R$ %.2f | %s",
+        return String.format("Contribuição #%s | pessoa %s | %s | R$ %.2f | %s",
                 id, pessoaId, descricao, valor, data);
     }
 }

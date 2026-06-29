@@ -6,20 +6,16 @@ import java.util.Optional;
 
 public class InstrutorDadosRepositoryEmMemoria implements InstrutorDadosRepository {
 
-    private final Map<Integer, InstrutorDados> dados = new HashMap<>();
+    private final Map<String, InstrutorDados> dados = new HashMap<>();
 
     @Override
-    public void salvarOuAtualizar(InstrutorDados d) {
-        dados.put(d.getPessoaId(), d);
-    }
+    public void salvarOuAtualizar(InstrutorDados d) { dados.put(d.getPessoaId(), d); }
 
     @Override
-    public Optional<InstrutorDados> buscarPorPessoaId(int pessoaId) {
+    public Optional<InstrutorDados> buscarPorPessoaId(String pessoaId) {
         return Optional.ofNullable(dados.get(pessoaId));
     }
 
     @Override
-    public void remover(int pessoaId) {
-        dados.remove(pessoaId);
-    }
+    public void remover(String pessoaId) { dados.remove(pessoaId); }
 }

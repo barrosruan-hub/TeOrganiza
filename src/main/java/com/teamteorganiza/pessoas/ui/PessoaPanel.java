@@ -30,7 +30,6 @@ public class PessoaPanel extends JPanel {
     private JTable tabela;
     private DefaultTableModel tableModel;
 
-    // filtros
     private JTextField tfBusca;
     private JComboBox<String> cbStatus;
     private JComboBox<String> cbFiltroTipo;
@@ -39,15 +38,12 @@ public class PessoaPanel extends JPanel {
     private ActionListener filtroTipoListener;
     private boolean atualizandoFiltroTipo = false;
 
-    // formulário básico
     private JTextField tfNome, tfDia, tfMes, tfAno, tfCpf, tfTelefone, tfEmail;
-    private Integer idSelecionado = null;
+    private String idSelecionado = null;
 
-    // tipos
     private JPanel painelCheckboxesTipos;
     private List<JCheckBox> checkboxesTipos = new ArrayList<>();
 
-    // dados instrutor
     private JPanel painelInstrutor;
     private JTextField tfSalario, tfEspecialidades;
 
@@ -104,10 +100,6 @@ public class PessoaPanel extends JPanel {
         atualizarTabela();
     }
 
-    // -------------------------------------------------------------------------
-    // Top bar
-    // -------------------------------------------------------------------------
-
     private JPanel montarTopBar() {
         JPanel topBar = new JPanel(new BorderLayout(8, 4));
 
@@ -157,10 +149,6 @@ public class PessoaPanel extends JPanel {
         return topBar;
     }
 
-    // -------------------------------------------------------------------------
-    // Formulário
-    // -------------------------------------------------------------------------
-
     private JPanel montarFormulario() {
         JPanel painel = new JPanel();
         painel.setLayout(new BoxLayout(painel, BoxLayout.Y_AXIS));
@@ -183,7 +171,6 @@ public class PessoaPanel extends JPanel {
         adicionarCampo(painel, "Telefone", tfTelefone);
         adicionarCampo(painel, "E-mail",   tfEmail);
 
-        // seção de tipos (checkboxes)
         JPanel secaoTipos = new JPanel(new BorderLayout());
         secaoTipos.setBorder(BorderFactory.createTitledBorder("Tipos de Pessoa"));
         secaoTipos.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -192,7 +179,6 @@ public class PessoaPanel extends JPanel {
         painel.add(secaoTipos);
         painel.add(Box.createVerticalStrut(4));
 
-        // seção instrutor (oculta por padrão)
         painelInstrutor = new JPanel();
         painelInstrutor.setLayout(new BoxLayout(painelInstrutor, BoxLayout.Y_AXIS));
         painelInstrutor.setBorder(BorderFactory.createTitledBorder("Dados do Instrutor"));
@@ -237,10 +223,6 @@ public class PessoaPanel extends JPanel {
         painel.add(Box.createVerticalStrut(4));
     }
 
-    // -------------------------------------------------------------------------
-    // Checkboxes de tipos
-    // -------------------------------------------------------------------------
-
     private void atualizarCheckboxesTipos(List<TipoPessoa> selecionados) {
         painelCheckboxesTipos.removeAll();
         checkboxesTipos.clear();
@@ -252,7 +234,7 @@ public class PessoaPanel extends JPanel {
             for (TipoPessoa tipo : ativos) {
                 JCheckBox cb = new JCheckBox(tipo.getNome());
                 cb.putClientProperty("tipoId", tipo.getId());
-                boolean marcado = selecionados.stream().anyMatch(t -> t.getId() == tipo.getId());
+                boolean marcado = selecionados.stream().anyMatch(t -> t.getId().equals(tipo.getId()));
                 cb.setSelected(marcado);
                 cb.addItemListener(e -> atualizarVisibilidadeInstrutor());
                 checkboxesTipos.add(cb);
@@ -284,8 +266,8 @@ public class PessoaPanel extends JPanel {
         List<TipoPessoa> ativos = tipoPessoaService.listarAtivos();
         for (JCheckBox cb : checkboxesTipos) {
             if (cb.isSelected()) {
-                int tipoId = (int) cb.getClientProperty("tipoId");
-                ativos.stream().filter(t -> t.getId() == tipoId).findFirst().ifPresent(selecionados::add);
+                String tipoId = (String) cb.getClientProperty("tipoId");
+                ativos.stream().filter(t -> t.getId().equals(tipoId)).findFirst().ifPresent(selecionados::add);
             }
         }
         return selecionados;
@@ -295,10 +277,6 @@ public class PessoaPanel extends JPanel {
         return checkboxesTipos.stream()
             .anyMatch(cb -> cb.getText().equalsIgnoreCase("instrutor") && cb.isSelected());
     }
-
-    // -------------------------------------------------------------------------
-    // Botões
-    // -------------------------------------------------------------------------
 
     private JPanel montarBotoes() {
         JPanel painel = new JPanel(new GridLayout(1, 4, 8, 0));
@@ -319,10 +297,6 @@ public class PessoaPanel extends JPanel {
         painel.add(btnExcluir);
         return painel;
     }
-
-    // -------------------------------------------------------------------------
-    // Ações
-    // -------------------------------------------------------------------------
 
     private void acaoCriar() {
         try {
@@ -391,16 +365,12 @@ public class PessoaPanel extends JPanel {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Formulário: popular, limpar, helpers
-    // -------------------------------------------------------------------------
-
     private void popularFormulario() {
         int row = tabela.getSelectedRow();
         if (row < 0) { idSelecionado = null; return; }
-        idSelecionado = (int) tableModel.getValueAt(row, 0);
+        idSelecionado = (String) tableModel.getValueAt(row, 0);
         service.listar().stream()
-            .filter(p -> p.getId() == idSelecionado)
+            .filter(p -> p.getId().equals(idSelecionado))
             .findFirst()
             .ifPresent(p -> {
                 tfNome.setText(p.getNome());
@@ -447,10 +417,6 @@ public class PessoaPanel extends JPanel {
             throw new IllegalArgumentException("Salário inválido. Use apenas números (ex: 1500.00).");
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Tabela e filtros
-    // -------------------------------------------------------------------------
 
     private void atualizarFiltroTipos() {
         if (cbFiltroTipo == null) return;

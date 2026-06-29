@@ -11,11 +11,10 @@ import java.awt.*;
 import java.util.List;
 import java.util.function.Function;
 
-/** Aba Vaquinhas: contribuições por vaquinha + ranking dos 3 maiores doadores. */
 public class VaquinhaTab extends JPanel {
 
     private final FinanceiroService service;
-    private final Function<Integer, String> nomeResolver;
+    private final Function<String, String> nomeResolver;
     private final Runnable onChange;
 
     private final JComboBox<VaquinhaItem> combo = new JComboBox<>();
@@ -23,14 +22,14 @@ public class VaquinhaTab extends JPanel {
     private final DefaultTableModel tableModel;
     private final JTable tabela;
     private final DefaultTableModel topModel;
-    private final JTextField tfId = new JTextField(8);
+    private final JTextField tfId = new JTextField(24);
     private final JTextArea taDescricao = new JTextArea(3, 20);
     private final JTextField tfValor = new JTextField(10);
 
     private List<ContribuicaoVaquinha> linhas = List.of();
     private boolean atualizandoCombo = false;
 
-    public VaquinhaTab(FinanceiroService service, Function<Integer, String> nomeResolver, Runnable onChange) {
+    public VaquinhaTab(FinanceiroService service, Function<String, String> nomeResolver, Runnable onChange) {
         this.service = service;
         this.nomeResolver = nomeResolver;
         this.onChange = onChange;
@@ -152,7 +151,7 @@ public class VaquinhaTab extends JPanel {
     private void criar() {
         Vaquinha v = vaquinhaSelecionada();
         if (v == null) { aviso("Crie ou selecione uma vaquinha primeiro."); return; }
-        Integer id = lerId();
+        String id = lerId();
         Double valor = lerValor();
         if (id == null || valor == null) return;
         service.contribuir(v, id, valor, taDescricao.getText().trim());
@@ -165,7 +164,7 @@ public class VaquinhaTab extends JPanel {
         if (v == null) return;
         int row = tabela.getSelectedRow();
         if (row < 0) { aviso("Selecione uma contribuição para editar."); return; }
-        Integer id = lerId();
+        String id = lerId();
         Double valor = lerValor();
         if (id == null || valor == null) return;
         service.editarContribuicao(v, linhas.get(row).getId(), id, taDescricao.getText().trim(), valor);
@@ -187,7 +186,7 @@ public class VaquinhaTab extends JPanel {
         int row = tabela.getSelectedRow();
         if (row < 0 || row >= linhas.size()) return;
         ContribuicaoVaquinha c = linhas.get(row);
-        tfId.setText(String.valueOf(c.getPessoaId()));
+        tfId.setText(c.getPessoaId());
         taDescricao.setText(c.getDescricao());
         tfValor.setText(String.format("%.2f", c.getValor()));
     }
@@ -233,10 +232,7 @@ public class VaquinhaTab extends JPanel {
 
     private void atualizarInfo() {
         Vaquinha v = vaquinhaSelecionada();
-        if (v == null) {
-            lblInfo.setText("Nenhuma vaquinha cadastrada.");
-            return;
-        }
+        if (v == null) { lblInfo.setText("Nenhuma vaquinha cadastrada."); return; }
         lblInfo.setText(String.format(
                 "Objetivo: %s  |  Arrecadado: R$ %.2f de R$ %.2f  |  Falta: R$ %.2f",
                 v.getObjetivo(), v.totalArrecadado(), v.getMeta(), v.quantoFalta()));
@@ -266,11 +262,11 @@ public class VaquinhaTab extends JPanel {
         return item == null ? null : item.vaquinha;
     }
 
-    private Integer lerId() {
+    private String lerId() {
         try {
             return CampoUtil.id(tfId.getText());
-        } catch (NumberFormatException ex) {
-            aviso("ID da pessoa inválido.");
+        } catch (IllegalArgumentException ex) {
+            aviso("ID da pessoa não informado.");
             return null;
         }
     }
@@ -288,7 +284,6 @@ public class VaquinhaTab extends JPanel {
         JOptionPane.showMessageDialog(this, msg, "Atenção", JOptionPane.WARNING_MESSAGE);
     }
 
-    /** Wrapper para exibir o título da vaquinha no combo. */
     private static class VaquinhaItem {
         final Vaquinha vaquinha;
         VaquinhaItem(Vaquinha vaquinha) { this.vaquinha = vaquinha; }

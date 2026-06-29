@@ -10,23 +10,22 @@ import java.awt.*;
 import java.util.List;
 import java.util.function.Function;
 
-/** Aba CRUD reutilizável para Entradas (RECEITA) e Despesas (DESPESA). */
 public class MovimentacaoTab extends JPanel {
 
     private final FinanceiroService service;
-    private final Function<Integer, String> nomeResolver;
+    private final Function<String, String> nomeResolver;
     private final Runnable onChange;
     private final TipoLancamento tipo;
 
     private final DefaultTableModel tableModel;
     private final JTable tabela;
-    private final JTextField tfId = new JTextField(8);
+    private final JTextField tfId = new JTextField(24);
     private final JTextArea taDescricao = new JTextArea(3, 24);
     private final JTextField tfValor = new JTextField(10);
 
     private List<MovimentacaoFinanceira> linhas = List.of();
 
-    public MovimentacaoTab(FinanceiroService service, Function<Integer, String> nomeResolver,
+    public MovimentacaoTab(FinanceiroService service, Function<String, String> nomeResolver,
                            Runnable onChange, TipoLancamento tipo) {
         this.service = service;
         this.nomeResolver = nomeResolver;
@@ -89,7 +88,7 @@ public class MovimentacaoTab extends JPanel {
     }
 
     private void criar() {
-        Integer id = lerId();
+        String id = lerId();
         Double valor = lerValor();
         if (id == null || valor == null) return;
         if (isEntrada()) service.registrarEntrada(id, taDescricao.getText().trim(), valor);
@@ -101,7 +100,7 @@ public class MovimentacaoTab extends JPanel {
     private void editar() {
         int row = tabela.getSelectedRow();
         if (row < 0) { aviso("Selecione um item para editar."); return; }
-        Integer id = lerId();
+        String id = lerId();
         Double valor = lerValor();
         if (id == null || valor == null) return;
         service.editarMovimentacao(linhas.get(row).getId(), id, taDescricao.getText().trim(), valor);
@@ -121,7 +120,7 @@ public class MovimentacaoTab extends JPanel {
         int row = tabela.getSelectedRow();
         if (row < 0 || row >= linhas.size()) return;
         MovimentacaoFinanceira m = linhas.get(row);
-        tfId.setText(String.valueOf(m.getPessoaId()));
+        tfId.setText(m.getPessoaId());
         taDescricao.setText(m.getDescricao());
         tfValor.setText(String.format("%.2f", m.getValor()));
     }
@@ -146,11 +145,11 @@ public class MovimentacaoTab extends JPanel {
         }
     }
 
-    private Integer lerId() {
+    private String lerId() {
         try {
             return CampoUtil.id(tfId.getText());
-        } catch (NumberFormatException ex) {
-            aviso("ID da pessoa inválido.");
+        } catch (IllegalArgumentException ex) {
+            aviso("ID da pessoa não informado.");
             return null;
         }
     }

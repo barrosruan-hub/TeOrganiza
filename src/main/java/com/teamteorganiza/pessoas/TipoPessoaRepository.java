@@ -3,6 +3,6 @@ package com.teamteorganiza.pessoas;
 import com.teamteorganiza.common.Repository;
 import java.util.Optional;
 
-public interface TipoPessoaRepository extends Repository<TipoPessoa, Integer> {
+public interface TipoPessoaRepository extends Repository<TipoPessoa, String> {
     Optional<TipoPessoa> buscarPorNome(String nome);
 }

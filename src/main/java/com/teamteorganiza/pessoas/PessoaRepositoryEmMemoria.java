@@ -10,21 +10,18 @@ public class PessoaRepositoryEmMemoria implements PessoaRepository {
 
     @Override
     public void salvar(Pessoa pessoa) {
+        pessoas.removeIf(p -> p.getId().equals(pessoa.getId()));
         pessoas.add(pessoa);
     }
 
     @Override
-    public Optional<Pessoa> buscarPorId(Integer id) {
-        return pessoas.stream().filter(p -> p.getId() == id).findFirst();
+    public Optional<Pessoa> buscarPorId(String id) {
+        return pessoas.stream().filter(p -> p.getId().equals(id)).findFirst();
     }
 
     @Override
-    public List<Pessoa> listarTodos() {
-        return new ArrayList<>(pessoas);
-    }
+    public List<Pessoa> listarTodos() { return new ArrayList<>(pessoas); }
 
     @Override
-    public void remover(Integer id) {
-        pessoas.removeIf(p -> p.getId() == id);
-    }
+    public void remover(String id) { pessoas.removeIf(p -> p.getId().equals(id)); }
 }

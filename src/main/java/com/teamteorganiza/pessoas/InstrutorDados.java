@@ -2,17 +2,17 @@ package com.teamteorganiza.pessoas;
 
 public class InstrutorDados {
 
-    private int pessoaId;
+    private final String pessoaId;
     private double salario;
     private String especialidades;
 
-    public InstrutorDados(int pessoaId, double salario, String especialidades) {
+    public InstrutorDados(String pessoaId, double salario, String especialidades) {
         this.pessoaId = pessoaId;
         this.salario = salario;
         this.especialidades = especialidades != null ? especialidades : "";
     }
 
-    public int getPessoaId() { return pessoaId; }
+    public String getPessoaId() { return pessoaId; }
 
     public double getSalario() { return salario; }
     public void setSalario(double salario) { this.salario = salario; }

@@ -4,28 +4,35 @@ import java.time.LocalDate;
 
 public class Mensalidade extends Lancamento {
 
-    private int pessoaId;
-    private String mesReferencia;
-    private LocalDate vencimento;
+    private final String pessoaId;
+    private final String mesReferencia;
+    private final LocalDate vencimento;
     private StatusMensalidade status;
 
-    public Mensalidade(int pessoaId, String mesReferencia, double valor, LocalDate vencimento) {
-        super("Mensalidade " + mesReferencia + " (pessoa " + pessoaId + ")",
-              valor, vencimento, TipoLancamento.RECEITA);
+    public Mensalidade(String pessoaId, String mesReferencia, double valor, LocalDate vencimento) {
+        super("Mensalidade " + mesReferencia, valor, vencimento, TipoLancamento.RECEITA);
         this.pessoaId = pessoaId;
         this.mesReferencia = mesReferencia;
         this.vencimento = vencimento;
         this.status = StatusMensalidade.EM_ABERTO;
     }
 
-    public int getPessoaId() { return pessoaId; }
+    public Mensalidade(String id, String pessoaId, String mesReferencia, double valor,
+                       LocalDate vencimento, StatusMensalidade status) {
+        super(id, "Mensalidade " + mesReferencia, valor, vencimento, TipoLancamento.RECEITA);
+        this.pessoaId = pessoaId;
+        this.mesReferencia = mesReferencia;
+        this.vencimento = vencimento;
+        this.status = status;
+    }
+
+    public String getPessoaId() { return pessoaId; }
     public String getMesReferencia() { return mesReferencia; }
     public LocalDate getVencimento() { return vencimento; }
     public StatusMensalidade getStatus() { return status; }
+    public void setStatus(StatusMensalidade status) { this.status = status; }
 
-    public void pagar() {
-        this.status = StatusMensalidade.PAGA;
-    }
+    public void pagar() { this.status = StatusMensalidade.PAGA; }
 
     public boolean estaAtrasada() {
         if (status == StatusMensalidade.PAGA) return false;
@@ -35,13 +42,11 @@ public class Mensalidade extends Lancamento {
     }
 
     @Override
-    public String mesDoLancamento() {
-        return mesReferencia;
-    }
+    public String mesDoLancamento() { return mesReferencia; }
 
     @Override
     public String detalhar() {
-        return String.format("Mensalidade #%d | pessoa %d | ref %s | venc %s | R$ %.2f | %s",
+        return String.format("Mensalidade #%s | pessoa %s | ref %s | venc %s | R$ %.2f | %s",
                 id, pessoaId, mesReferencia, vencimento, valor, status);
     }
 }

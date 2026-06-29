@@ -3,11 +3,11 @@ package com.teamteorganiza.pessoas;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Pessoa {
 
-    private static int idCounter = 0;
-    private int id;
+    private final String id;
     private String nome;
     private LocalDate dataDeNascimento;
     private String cpf;
@@ -17,7 +17,7 @@ public class Pessoa {
     private List<TipoPessoa> tipos = new ArrayList<>();
 
     public Pessoa(String nome, LocalDate nascimento, String cpf, String telefone, String email, boolean ativo) {
-        this.id = ++idCounter;
+        this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.dataDeNascimento = nascimento;
         this.cpf = cpf;
@@ -26,7 +26,17 @@ public class Pessoa {
         this.ativo = ativo;
     }
 
-    public int getId() { return id; }
+    public Pessoa(String id, String nome, LocalDate nascimento, String cpf, String telefone, String email, boolean ativo) {
+        this.id = id;
+        this.nome = nome;
+        this.dataDeNascimento = nascimento;
+        this.cpf = cpf;
+        this.telefone = telefone;
+        this.email = email;
+        this.ativo = ativo;
+    }
+
+    public String getId() { return id; }
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }

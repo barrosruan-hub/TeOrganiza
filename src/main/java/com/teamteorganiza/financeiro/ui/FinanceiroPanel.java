@@ -28,7 +28,7 @@ public class FinanceiroPanel extends JPanel {
         topBar.add(btnVoltar);
         add(topBar, BorderLayout.NORTH);
 
-        Function<Integer, String> nomeResolver = id -> nomeDe(pessoaService, id);
+        Function<String, String> nomeResolver = id -> nomeDe(pessoaService, id);
         Runnable onChange = this::recarregarTodas;
 
         extratoTab  = new ExtratoTab(service, nomeResolver);
@@ -60,11 +60,11 @@ public class FinanceiroPanel extends JPanel {
         caixaTab.recarregar();
     }
 
-    private static String nomeDe(PessoaService pessoaService, int pessoaId) {
-        if (pessoaId <= 0) return "(caixa/evento)";
+    private static String nomeDe(PessoaService pessoaService, String pessoaId) {
+        if (pessoaId == null || pessoaId.isEmpty()) return "(evento)";
         for (Pessoa p : pessoaService.listar()) {
-            if (p.getId() == pessoaId) return p.getNome();
+            if (p.getId().equals(pessoaId)) return p.getNome();
         }
-        return "(id " + pessoaId + " não encontrado)";
+        return "(não encontrado)";
     }
 }

@@ -14,15 +14,14 @@ import java.awt.*;
 import java.util.List;
 import java.util.function.Function;
 
-/** Aba somente leitura: consolida todos os lançamentos do financeiro. */
 public class ExtratoTab extends JPanel {
 
     private final FinanceiroService service;
-    private final Function<Integer, String> nomeResolver;
+    private final Function<String, String> nomeResolver;
     private final DefaultTableModel tableModel;
     private final JLabel resumo = new JLabel(" ");
 
-    public ExtratoTab(FinanceiroService service, Function<Integer, String> nomeResolver) {
+    public ExtratoTab(FinanceiroService service, Function<String, String> nomeResolver) {
         this.service = service;
         this.nomeResolver = nomeResolver;
 
@@ -50,11 +49,11 @@ public class ExtratoTab extends JPanel {
         double receitas = 0, despesas = 0;
         List<Lancamento> lancamentos = service.todosLancamentos();
         for (Lancamento l : lancamentos) {
-            int pessoaId = pessoaIdDe(l);
+            String pessoaId = pessoaIdDe(l);
             tableModel.addRow(new Object[]{
                 l.getId(),
                 l.getTipo(),
-                pessoaId == 0 ? "-" : pessoaId,
+                pessoaId == null || pessoaId.isEmpty() ? "-" : pessoaId,
                 nomeResolver.apply(pessoaId),
                 String.format("R$ %.2f", l.getValor()),
                 l.getDescricao(),
@@ -68,11 +67,11 @@ public class ExtratoTab extends JPanel {
                 receitas, despesas, receitas - despesas));
     }
 
-    private int pessoaIdDe(Lancamento l) {
+    private String pessoaIdDe(Lancamento l) {
         if (l instanceof MovimentacaoFinanceira m) return m.getPessoaId();
         if (l instanceof ContribuicaoVaquinha c) return c.getPessoaId();
         if (l instanceof VendaCaixa v) return v.getPessoaId();
         if (l instanceof Mensalidade me) return me.getPessoaId();
-        return 0;
+        return null;
     }
 }

@@ -22,25 +22,28 @@ public class FinanceiroService {
 
     // ===================== Mensalidades =====================
 
-    public void emitirMensalidade(int pessoaId, String mes, double valor, LocalDate venc) {
+    public void emitirMensalidade(String pessoaId, String mes, double valor, LocalDate venc) {
         mensalidadeRepo.salvar(new Mensalidade(pessoaId, mes, valor, venc));
     }
 
-    public void pagarMensalidade(int id) {
-        mensalidadeRepo.buscarPorId(id).ifPresent(Mensalidade::pagar);
+    public void pagarMensalidade(String id) {
+        mensalidadeRepo.buscarPorId(id).ifPresent(m -> {
+            m.pagar();
+            mensalidadeRepo.salvar(m);
+        });
     }
 
     public List<Mensalidade> getMensalidades() { return mensalidadeRepo.listarTodos(); }
 
     // ===================== Entradas / Despesas =====================
 
-    public MovimentacaoFinanceira registrarEntrada(int pessoaId, String descricao, double valor) {
+    public MovimentacaoFinanceira registrarEntrada(String pessoaId, String descricao, double valor) {
         MovimentacaoFinanceira m = new MovimentacaoFinanceira(pessoaId, descricao, valor, TipoLancamento.RECEITA);
         movimentacoes.add(m);
         return m;
     }
 
-    public MovimentacaoFinanceira registrarDespesa(int pessoaId, String descricao, double valor) {
+    public MovimentacaoFinanceira registrarDespesa(String pessoaId, String descricao, double valor) {
         MovimentacaoFinanceira m = new MovimentacaoFinanceira(pessoaId, descricao, valor, TipoLancamento.DESPESA);
         movimentacoes.add(m);
         return m;
@@ -57,9 +60,9 @@ public class FinanceiroService {
         return resultado;
     }
 
-    public void editarMovimentacao(int id, int pessoaId, String descricao, double valor) {
+    public void editarMovimentacao(String id, String pessoaId, String descricao, double valor) {
         for (MovimentacaoFinanceira m : movimentacoes) {
-            if (m.getId() == id) {
+            if (m.getId().equals(id)) {
                 m.setPessoaId(pessoaId);
                 m.setDescricao(descricao);
                 m.setValor(valor);
@@ -68,8 +71,8 @@ public class FinanceiroService {
         }
     }
 
-    public void removerMovimentacao(int id) {
-        movimentacoes.removeIf(m -> m.getId() == id);
+    public void removerMovimentacao(String id) {
+        movimentacoes.removeIf(m -> m.getId().equals(id));
     }
 
     public double totalEntradas() { return somar(getEntradas()); }
@@ -89,13 +92,13 @@ public class FinanceiroService {
     public String getNomeEvento() { return caixa.getNomeEvento(); }
     public void setNomeEvento(String nome) { caixa.setNomeEvento(nome); }
 
-    public VendaCaixa registrarVenda(int pessoaId, String descricao, double valor) {
+    public VendaCaixa registrarVenda(String pessoaId, String descricao, double valor) {
         return caixa.registrarVenda(pessoaId, descricao, valor);
     }
 
-    public void editarVenda(int id, int pessoaId, String descricao, double valor) {
+    public void editarVenda(String id, String pessoaId, String descricao, double valor) {
         for (VendaCaixa v : caixa.getVendas()) {
-            if (v.getId() == id) {
+            if (v.getId().equals(id)) {
                 v.setPessoaId(pessoaId);
                 v.setDescricao(descricao);
                 v.setValor(valor);
@@ -104,20 +107,14 @@ public class FinanceiroService {
         }
     }
 
-    public void removerVenda(int id) {
-        caixa.removerVenda(id);
-    }
+    public void removerVenda(String id) { caixa.removerVenda(id); }
 
-    /**
-     * Fecha o caixa do evento atual: o total das vendas vira uma única
-     * entrada no financeiro e o caixa é reiniciado para um novo evento.
-     */
     public void fecharCaixa(String nomeNovoEvento) {
         double total = caixa.total();
         if (total > 0) {
             String desc = "Vendas do evento: " + caixa.getNomeEvento()
                     + " (" + caixa.quantidadeVendas() + " venda(s))";
-            movimentacoes.add(new MovimentacaoFinanceira(0, desc, total, TipoLancamento.RECEITA));
+            movimentacoes.add(new MovimentacaoFinanceira("", desc, total, TipoLancamento.RECEITA));
         }
         caixa.novoEvento(nomeNovoEvento);
     }
@@ -132,13 +129,13 @@ public class FinanceiroService {
         return v;
     }
 
-    public ContribuicaoVaquinha contribuir(Vaquinha v, int pessoaId, double valor, String descricao) {
+    public ContribuicaoVaquinha contribuir(Vaquinha v, String pessoaId, double valor, String descricao) {
         return v.contribuir(pessoaId, valor, descricao);
     }
 
-    public void editarContribuicao(Vaquinha v, int id, int pessoaId, String descricao, double valor) {
+    public void editarContribuicao(Vaquinha v, String id, String pessoaId, String descricao, double valor) {
         for (ContribuicaoVaquinha c : v.getContribuicoes()) {
-            if (c.getId() == id) {
+            if (c.getId().equals(id)) {
                 c.setPessoaId(pessoaId);
                 c.setDescricao(descricao);
                 c.setValor(valor);
@@ -147,13 +144,10 @@ public class FinanceiroService {
         }
     }
 
-    public void removerContribuicao(Vaquinha v, int id) {
-        v.removerContribuicao(id);
-    }
+    public void removerContribuicao(Vaquinha v, String id) { v.removerContribuicao(id); }
 
-    /** Top 3 maiores doadores somando as contribuições de todas as vaquinhas. */
     public List<Doador> top3Doadores() {
-        Map<Integer, Double> totais = new HashMap<>();
+        Map<String, Double> totais = new HashMap<>();
         for (Vaquinha v : vaquinhas) {
             for (ContribuicaoVaquinha c : v.getContribuicoes()) {
                 totais.merge(c.getPessoaId(), c.getValor(), Double::sum);
